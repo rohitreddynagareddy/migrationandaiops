@@ -1,0 +1,66 @@
+/* Cloud Migration Tool Styles */
+.migration-wizard {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.wizard-step {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.wizard-step-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--gray-200);
+}
+
+.wizard-step-number {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--gray-200);
+    color: var(--gray-600);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.wizard-step.active .wizard-step-number {
+    background: var(--secondary-blue);
+    color: white;
+}
+
+.wizard-step-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.wizard-step-content {
+    padding-left: 52px;
+    display: none;
+}
+
+.wizard-step.active .wizard-step-content {
+    display: block;
+}
+
+.progress-bar-container {
+    width: 100%;
+    background-color: var(--gray-200);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    width: 0%;
+    height: 10px;
+    background-color: var(--secondary-blue);
+    transition: width 0.5s ease-in-out;
+}

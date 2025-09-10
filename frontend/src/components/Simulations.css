@@ -1,0 +1,89 @@
+/* Simulations Tool Specific Styles */
+.simulation-grid {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 1.5rem;
+    height: calc(100vh - 200px);
+}
+
+.simulation-controls {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+}
+
+.simulation-visualization {
+    background: var(--gray-900);
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    position: relative;
+    overflow: hidden;
+    background-image: radial-gradient(var(--gray-700) 1px, transparent 0);
+    background-size: 20px 20px;
+}
+
+.sim-node {
+    position: absolute;
+    width: 100px;
+    height: 60px;
+    background: var(--gray-800);
+    border: 1px solid var(--gray-600);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: all 0.5s ease;
+    cursor: pointer;
+}
+
+.sim-node.healthy {
+    border-left: 5px solid var(--success-green);
+}
+
+.sim-node.degraded {
+    border-left: 5px solid var(--warning-yellow);
+    animation: pulse-warn 1.5s infinite;
+}
+
+.sim-node.failed {
+    border-left: 5px solid var(--danger-red);
+    background: var(--danger-red);
+    animation: pulse-fail 1s infinite;
+}
+
+@keyframes pulse-warn {
+    0%, 100% {
+        box-shadow: 0 0 10px var(--warning-yellow);
+    }
+    50% {
+        box-shadow: 0 0 0px var(--warning-yellow);
+    }
+}
+
+@keyframes pulse-fail {
+    0%, 100% {
+        transform: scale(1.05);
+    }
+    50% {
+        transform: scale(1);
+    }
+}
+
+.sim-results-log {
+    flex-grow: 1;
+    overflow-y: auto;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.8rem;
+    color: var(--gray-300);
+    background: var(--gray-900);
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin-top: 1rem;
+}

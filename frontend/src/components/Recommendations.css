@@ -1,0 +1,123 @@
+/* Recommendations Tool Styles */
+.recommendations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+.recommendation-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    transition: all 0.2s;
+}
+
+.recommendation-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.rec-header {
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.rec-category {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    text-transform: uppercase;
+}
+
+.rec-category.cost {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.rec-category.performance {
+    background-color: #dbeafe;
+    color: #312e81;
+}
+
+.rec-category.security {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.rec-content {
+    padding: 1.5rem;
+    flex-grow: 1;
+}
+
+.rec-title {
+    font-weight: 600;
+    font-size: 1.125rem;
+    color: var(--gray-800);
+    margin-bottom: 0.5rem;
+}
+
+.rec-description {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.rec-impact {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0.75rem;
+    background: var(--gray-100);
+    border-radius: 6px;
+}
+
+.rec-impact-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--gray-700);
+}
+
+.rec-impact-value {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.rec-footer {
+    padding: 1rem 1.5rem;
+    background: var(--gray-50);
+    border-top: 1px solid var(--gray-200);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 0 0 8px 8px;
+}
+
+.rec-status-tag {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    text-transform: capitalize;
+}
+
+.rec-status-tag.new {
+    background-color: #e0f2fe;
+    color: #0c4a6e;
+}
+
+.rec-status-tag.applied {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.rec-status-tag.dismissed {
+    background-color: #f1f5f9;
+    color: #475569;
+}

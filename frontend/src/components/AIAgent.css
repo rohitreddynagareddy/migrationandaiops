@@ -1,0 +1,104 @@
+/* AI Agent Section */
+.ai-agent-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.chat-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    overflow: hidden;
+    min-height: 400px;
+}
+
+.chat-header {
+    padding: 1rem;
+    background: var(--primary-blue);
+    color: white;
+    font-weight: 600;
+}
+
+.chat-messages {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.message {
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    max-width: 80%;
+    line-height: 1.5;
+}
+
+.message.user {
+    background: var(--secondary-blue);
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 2px;
+}
+
+.message.agent {
+    background: var(--gray-100);
+    color: var(--gray-800);
+    align-self: flex-start;
+    border-bottom-left-radius: 2px;
+}
+
+.chat-input {
+    display: flex;
+    border-top: 1px solid var(--gray-200);
+}
+
+.chat-input input {
+    flex: 1;
+    padding: 1rem;
+    border: none;
+    outline: none;
+    font-size: 0.875rem;
+}
+
+.chat-input button {
+    padding: 0 1.5rem;
+    background: var(--secondary-blue);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.ai-panel {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.action-buttons button, .table-actions button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.accept-btn {
+    background-color: var(--success-green);
+    color: white;
+    border: 1px solid var(--success-green);
+}
+
+.dismiss-btn {
+    background-color: transparent;
+    color: var(--gray-600);
+    border: 1px solid var(--gray-300);
+}
