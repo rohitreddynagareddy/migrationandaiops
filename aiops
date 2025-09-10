@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AT&T Reliability Twin Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+        }
+
+        :root {
+            --primary-blue: #1e3a8a;
+            --secondary-blue: #3b82f6;
+            --dark-blue: #0f172a;
+            --light-blue: #60a5fa;
+            --success-green: #10b981;
+            --warning-yellow: #f59e0b;
+            --danger-red: #ef4444;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+        }
+
+        body {
+            background: #f8f9fa;
+            color: #1f2937;
+            min-height: 100vh;
+            display: flex;
+            overflow: hidden; /* Prevent body scroll */
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 220px;
+            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+
+        .platform-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .platform-subtitle {
+            font-size: 0.75rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-section {
+            padding: 1rem 0;
+        }
+
+        .nav-section-title {
+            padding: 0.5rem 1rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            opacity: 0.6;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: white;
+        }
+
+        .nav-icon {
+            width: 18px;
+            height: 18px;
+            opacity: 0.9;
+        }
+
+        /* Main Content */
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        .page-content {
+            display: none;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .page-content.active {
+            display: block;
+        }
+
+        /* Top Bar */
+        .topbar {
+            background: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--gray-200);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .status-banner {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .system-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: #dcfce7;
+            color: #166534;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #22c55e;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .alert-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--secondary-blue);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+
+        .action-button {
+            padding: 0.5rem 1rem;
+            background: var(--secondary-blue);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .action-button:disabled {
+            background: var(--gray-300);
+            cursor: not-allowed;
+        }
+
+        .action-button:hover:not(:disabled) {
+            background: var(--primary-blue);
+            transform: translateY(-1px);
+        }
+
+        .action-button.secondary {
+            background: white;
+            color: var(--secondary-blue);
+            border: 1px solid var(--secondary-blue);
+        }
+
+        .action-button.secondary:hover {
+            background: var(--gray-100);
+        }
+
+        /* Dashboard Content */
+        .dashboard-content {
+            padding: 1.5rem;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, var(--secondary-blue), var(--light-blue));
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1), transparent);
+            border-radius: 50%;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-title {
+            font-size: 2rem;
+            font-weight: 300;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        .section-header {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--gray-800);
+        }
+        
+        /* Home Dashboard Specifics */
+        .alerts-section { margin-bottom: 1.5rem; }
+        .alerts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1rem; }
+        .alert-card { background: white; border-radius: 8px; padding: 1.25rem; border-left: 4px solid; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: all 0.2s; }
+        .alert-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.15); transform: translateY(-2px); }
+        .alert-card.high { border-left-color: var(--danger-red); }
+        .alert-card.medium { border-left-color: var(--warning-yellow); }
+        .alert-card.low { border-left-color: var(--success-green); }
+        .alert-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; }
+        .alert-title { font-weight: 600; color: var(--gray-800); }
+        .severity-badge { padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+        .severity-badge.high { background: #fee2e2; color: var(--danger-red); }
+        .severity-badge.medium { background: #ffedd5; color: #9a3412; }
+        .severity-badge.low { background: #d1fae5; color: #065f46; }
+        .alert-description { color: var(--gray-600); font-size: 0.875rem; line-height: 1.5; margin-bottom: 0.75rem; }
+        .alert-meta { display: flex; gap: 1rem; font-size: 0.75rem; color: var(--gray-500); }
+        .dashboard-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; }
+        .chart-container { background: white; border-radius: 8px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .chart-header { margin-bottom: 1.5rem; }
+        .chart-title { font-weight: 600; color: var(--gray-800); }
+        .chart-area { height: 300px; display: flex; align-items: flex-end; gap: 0.5rem; }
+        .chart-bar { flex: 1; background: linear-gradient(180deg, var(--secondary-blue), var(--light-blue)); border-radius: 4px 4px 0 0; }
+        .summary-panel { background: white; border-radius: 8px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .summary-title { font-weight: 600; margin-bottom: 1.5rem; }
+        .summary-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid var(--gray-200); }
+        .summary-item:last-child { border-bottom: none; }
+        .summary-label { color: var(--gray-600); }
+        .summary-value { font-weight: 600; }
+        .summary-value.positive { color: var(--success-green); }
+        .summary-value.warning { color: var(--warning-yellow); }
+        .summary-value.danger { color: var(--danger-red); }
+
+        /* Generic Card Style */
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        /* Table Styles */
+        .table-container { overflow-x: auto; }
+        .styled-table { width: 100%; border-collapse: collapse; }
+        .styled-table th, .styled-table td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--gray-200); white-space: nowrap; }
+        .styled-table th { font-size: 0.75rem; text-transform: uppercase; color: var(--gray-500); letter-spacing: 0.5px; }
+        
+        /* Status Tags */
+        .status-tag { font-size: 0.75rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 12px; text-transform: capitalize; }
+        .status-tag.new { color: #1d4ed8; background-color: #dbeafe; }
+        .status-tag.acknowledged { color: #9a3412; background-color: #ffedd5; }
+        .status-tag.resolved { color: #065f46; background-color: #d1fae5; }
+        .status-tag.pending { color: #9a3412; background-color: #ffedd5; }
+        .status-tag.in-progress { color: #1d4ed8; background-color: #dbeafe; }
+        .status-tag.completed { color: #065f46; background-color: #d1fae5; }
+        .status-tag.failed { color: #991b1b; background-color: #fee2e2; }
+        .status-tag.compatible { color: #065f46; background-color: #d1fae5; }
+        .status-tag.incompatible { color: #991b1b; background-color: #fee2e2; }
+
+        /* AI Agent Section */
+        .ai-agent-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .chat-container { flex: 1; display: flex; flex-direction: column; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden; min-height: 400px; }
+        .chat-header { padding: 1rem; background: var(--primary-blue); color: white; font-weight: 600; }
+        .chat-messages { flex: 1; padding: 1rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; }
+        .message { padding: 0.75rem 1rem; border-radius: 12px; max-width: 80%; line-height: 1.5; }
+        .message.user { background: var(--secondary-blue); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .message.agent { background: var(--gray-100); color: var(--gray-800); align-self: flex-start; border-bottom-left-radius: 2px; }
+        .chat-input { display: flex; border-top: 1px solid var(--gray-200); }
+        .chat-input input { flex: 1; padding: 1rem; border: none; outline: none; font-size: 0.875rem; }
+        .chat-input button { padding: 0 1.5rem; background: var(--secondary-blue); color: white; border: none; cursor: pointer; font-weight: 500; }
+        .ai-panel { background: white; border-radius: 8px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .action-buttons button, .table-actions button { padding: 0.4rem 0.8rem; font-size: 0.75rem; font-weight: 500; border-radius: 4px; cursor: pointer; transition: all 0.2s; }
+        .accept-btn { background-color: var(--success-green); color: white; border: 1px solid var(--success-green); }
+        .dismiss-btn { background-color: transparent; color: var(--gray-600); border: 1px solid var(--gray-300); }
+        
+        /* Alerts Center Specific Styles */
+        .alerts-summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem; }
+        .summary-card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .summary-card-title { font-size: 0.875rem; color: var(--gray-500); margin-bottom: 0.5rem; }
+        .summary-card-value { font-size: 2rem; font-weight: 600; color: var(--gray-800); }
+        .alerts-toolbar { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .alerts-toolbar .search-bar { flex-grow: 1; display: flex; }
+        .alerts-toolbar input, .alerts-toolbar select { padding: 0.6rem 0.75rem; border: 1px solid var(--gray-300); border-radius: 6px; font-size: 0.875rem; background: white; }
+        
+        /* Simulations Tool Specific Styles */
+        .simulation-grid { display: grid; grid-template-columns: 350px 1fr; gap: 1.5rem; height: calc(100vh - 200px); }
+        .simulation-controls { background: white; border-radius: 8px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
+        .simulation-visualization { background: var(--gray-900); border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); position: relative; overflow: hidden; background-image: radial-gradient(var(--gray-700) 1px, transparent 0); background-size: 20px 20px; }
+        .sim-node { position: absolute; width: 100px; height: 60px; background: var(--gray-800); border: 1px solid var(--gray-600); border-radius: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; font-size: 0.8rem; font-weight: 500; transition: all 0.5s ease; cursor: pointer; }
+        .sim-node.healthy { border-left: 5px solid var(--success-green); }
+        .sim-node.degraded { border-left: 5px solid var(--warning-yellow); animation: pulse-warn 1.5s infinite; }
+        .sim-node.failed { border-left: 5px solid var(--danger-red); background: var(--danger-red); animation: pulse-fail 1s infinite;}
+        @keyframes pulse-warn { 0%, 100% { box-shadow: 0 0 10px var(--warning-yellow); } 50% { box-shadow: 0 0 0px var(--warning-yellow); } }
+        @keyframes pulse-fail { 0%, 100% { transform: scale(1.05); } 50% { transform: scale(1); } }
+        .sim-results-log { flex-grow: 1; overflow-y: auto; font-family: 'Courier New', Courier, monospace; font-size: 0.8rem; color: var(--gray-300); background: var(--gray-900); padding: 0.5rem; border-radius: 4px; margin-top: 1rem; }
+        
+        /* Recommendations Tool Styles */
+        .recommendations-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem; }
+        .recommendation-card { background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; transition: all 0.2s; }
+        .recommendation-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: translateY(-2px); }
+        .rec-header { padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--gray-200); }
+        .rec-category { font-size: 0.75rem; font-weight: 600; padding: 0.25rem 0.75rem; border-radius: 12px; text-transform: uppercase; }
+        .rec-category.cost { background-color: #dcfce7; color: #166534; }
+        .rec-category.performance { background-color: #dbeafe; color: #312e81; }
+        .rec-category.security { background-color: #fee2e2; color: #991b1b; }
+        .rec-content { padding: 1.5rem; flex-grow: 1; }
+        .rec-title { font-weight: 600; font-size: 1.125rem; color: var(--gray-800); margin-bottom: 0.5rem; }
+        .rec-description { font-size: 0.875rem; color: var(--gray-600); line-height: 1.6; margin-bottom: 1rem; }
+        .rec-impact { display: flex; gap: 0.5rem; align-items: center; padding: 0.75rem; background: var(--gray-100); border-radius: 6px; }
+        .rec-impact-label { font-size: 0.8rem; font-weight: 500; color: var(--gray-700); }
+        .rec-impact-value { font-size: 1rem; font-weight: 600; }
+        .rec-footer { padding: 1rem 1.5rem; background: var(--gray-50); border-top: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; border-radius: 0 0 8px 8px; }
+        .rec-status-tag { font-size: 0.75rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 12px; text-transform: capitalize; }
+        .rec-status-tag.new { background-color: #e0f2fe; color: #0c4a6e; }
+        .rec-status-tag.applied { background-color: #d1fae5; color: #065f46; }
+        .rec-status-tag.dismissed { background-color: #f1f5f9; color: #475569; }
+
+        /* Cloud Migration Tool Styles */
+        .migration-wizard { display: flex; flex-direction: column; gap: 1.5rem; }
+        .wizard-step { display: flex; flex-direction: column; gap: 1rem; }
+        .wizard-step-header { display: flex; align-items: center; gap: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--gray-200); }
+        .wizard-step-number { width: 32px; height: 32px; border-radius: 50%; background: var(--gray-200); color: var(--gray-600); display: flex; align-items: center; justify-content: center; font-weight: 600; transition: all 0.3s ease; }
+        .wizard-step.active .wizard-step-number { background: var(--secondary-blue); color: white; }
+        .wizard-step-title { font-size: 1.25rem; font-weight: 600; }
+        .wizard-step-content { padding-left: 52px; display: none; }
+        .wizard-step.active .wizard-step-content { display: block; }
+        .progress-bar-container { width: 100%; background-color: var(--gray-200); border-radius: 4px; overflow: hidden; }
+        .progress-bar { width: 0%; height: 10px; background-color: var(--secondary-blue); transition: width 0.5s ease-in-out; }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .dashboard-grid, .ai-agent-grid, .simulation-grid, .recommendations-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { display: none; }
+            .topbar { flex-direction: column; gap: 1rem; padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="platform-title">Reliability Twin</div>
+            <div class="platform-subtitle">AT&T Operations Platform</div>
+        </div>
+        <div class="nav-section">
+            <div class="nav-section-title">PRIMARY OPERATIONS</div>
+            <div class="nav-item active" data-target="home-dashboard"><svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/></svg>Home</div>
+            <div class="nav-item" data-target="ai-agent"><svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/></svg>AI Agent</div>
+            <div class="nav-item" data-target="alerts-center"><svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a6 6 0 00-6 6v3.586l-1.707 1.707A1 1 0 003 15h14a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM8.05 16h3.9a2 2 0 11-3.9 0z" clip-rule="evenodd" /></svg>Alerts Center</div>
+            <div class="nav-item" data-target="simulations"><svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 0l-2 2a1 1 0 101.414 1.414L8 10.414l1.293 1.293a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>Simulations</div>
+            <div class="nav-item" data-target="recommendations"><svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>Recommendations</div>
+            <div class="nav-item" data-target="cloud-migration"><svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.707 4.293a1 1 0 010 1.414L4.414 8H13a1 1 0 110 2H4.414l2.293 2.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /><path fill-rule="evenodd" d="M16.5 3a1 1 0 011 1v12a1 1 0 01-1 1h-1.5a1 1 0 110-2H16V5h-.5a1 1 0 110-2H16z" clip-rule="evenodd" /></svg>Cloud Migration</div>
+        </div>
+        <div class="nav-section"><div class="nav-section-title">AZURE SERVICES</div><div class="nav-item"><svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20"><path d="M3 12v3c0 1.657 3.134 3 7 3s7-1.343 7-3v-3c0 1.657-3.134 3-7 3s-7-1.343-7-3z"/><path d="M3 7v3c0 1.657 3.134 3 7 3s7-1.343 7-3V7c0 1.657-3.134 3-7 3S3 8.657 3 7z"/><path d="M17 5c0 1.657-3.134 3-7 3S3 6.657 3 5s3.134-3 7-3 7 1.343 7 3z"/></svg>SQL Database</div><div class="nav-item"><svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm3.293 1.293a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 01-1.414-1.414L7.586 10 5.293 7.707a1 1 0 010-1.414zM11 12a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/></svg>App Service</div><div class="nav-item"><svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5zm0 2h10v10H5V5zm2 2v2h2V7H7zm4 0v2h2V7h-2zm-4 4v2h2v-2H7zm4 0v2h2v-2h-2z" /></svg>AKS Service</div><div class="nav-item"><svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2 5a2 2 0 012-2h12a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm2-2v6h12V3H4zM1 15a1 1 0 011-1h14a1 1 0 110 2H2a1 1 0 01-1-1z" clip-rule="evenodd" /></svg>Virtual Machines</div><div class="nav-item"><svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20"><path d="M11.94 2.444a1 1 0 00-1.381.1L5.94 8.75H3a1 1 0 100 2h3.586l-2.04 4.08a1 1 0 001.78.9l5.62-11.24a1 1 0 00-.026-1.046z" /></svg>Functions</div><div class="nav-item"><svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zM2 10a8.001 8.001 0 0113.155-6.319l-2.486 2.486A5.001 5.001 0 005.136 12.3l-2.486 2.486A7.962 7.962 0 012 10z" /></svg>Cosmos DB</div><div class="nav-item"><svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20"><path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/></svg>Storage</div></div>
+        <div class="nav-section"><div class="nav-section-title">ON-PREMISE SERVICES</div><div class="nav-item"><svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2 3a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H3a1 1 0 01-1-1V3zm0 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H3a1 1 0 01-1-1V8zm0 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H3a1 1 0 01-1-1v-2z" clip-rule="evenodd" /></svg>Data Center</div><div class="nav-item"><svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2H5a1 1 0 110-2V4zm3 2a1 1 0 011-1h2a1 1 0 110 2H8a1 1 0 01-1-1zm-1 4a1 1 0 100 2h4a1 1 0 100-2H6zm1 3a1 1 0 011-1h2a1 1 0 110 2H8a1 1 0 01-1-1z" clip-rule="evenodd" /></svg>Legacy Systems</div></div>
+        <div class="nav-section"><div class="nav-section-title">SECONDARY TOOLS</div><div class="nav-item"><svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/></svg>Schedule Manager</div><div class="nav-item"><svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"/></svg>Reports Generator</div><div class="nav-item"><svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/></svg>Admin & Config</div></div>
+    </aside>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Top Bar -->
+        <header class="topbar"><div class="status-banner"><div class="system-status"><span class="status-dot"></span>All Azure Systems are 100% Connected</div><div class="alert-badge">28 New AI Alerts & Recommendations</div></div><div class="user-actions"><div class="user-info">User: Admin</div><button class="action-button secondary">Invite</button><button class="action-button">Publish</button></div></header>
+        
+        <!-- MAIN PAGES -->
+        <main id="home-dashboard" class="dashboard-content page-content active">
+            <div class="hero-section"><div class="hero-content"><h1 class="hero-title">Azure Infrastructure Health Monitor</h1><p class="hero-subtitle">AI-Powered Digital Twin predicting failures 48 hours in advance</p></div></div>
+            <div class="alerts-section"><h2 class="section-header">Live Predictions</h2><div class="alerts-grid"><div class="alert-card high"><div class="alert-header"><div class="alert-title">Critical Failure Risk: SQL-DB-PROD-01</div><span class="severity-badge high">High</span></div><p class="alert-description">AI model predicts a 92% probability of cascading failure within the next 12 hours due to sustained high CPU utilization and memory pressure.</p><div class="alert-meta"><span>Source: Prometheus</span><span>Time: 2 min ago</span></div></div><div class="alert-card medium"><div class="alert-header"><div class="alert-title">Performance Degradation: AppSvc-Gateway</div><span class="severity-badge medium">Medium</span></div><p class="alert-description">Response latency has increased by 75% over the last hour. Potential scaling issue detected.</p><div class="alert-meta"><span>Source: Azure Monitor</span><span>Time: 15 min ago</span></div></div><div class="alert-card low"><div class="alert-header"><div class="alert-title">Storage Capacity Warning</div><span class="severity-badge low">Low</span></div><p class="alert-description">Storage account 'datalakegen2prod' is projected to reach 85% capacity in the next 72 hours.</p><div class="alert-meta"><span>Source: Capacity Planner</span><span>Time: 1 hour ago</span></div></div></div></div>
+            <div class="dashboard-grid"><div class="chart-container"><div class="chart-header"><div class="chart-title">System Reliability Score (24h)</div></div><div class="chart-area" id="chartArea"></div></div><div class="summary-panel"><h3 class="summary-title">Today's Twin Summary</h3><div class="summary-item"><span class="summary-label">Reliability Score</span><span class="summary-value positive">98.7%</span></div><div class="summary-item"><span class="summary-label">Predicted Outages</span><span class="summary-value danger">1</span></div><div class="summary-item"><span class="summary-label">Anomalies Detected</span><span class="summary-value warning">14</span></div><div class="summary-item"><span class="summary-label">Automated Actions</span><span class="summary-value">3</span></div></div></div>
+        </main>
+        <main id="ai-agent" class="dashboard-content page-content">
+            <div class="ai-agent-grid"><div class="ai-agent-column"><div class="chat-container"><div class="chat-header">AI Agent Chat</div><div class="chat-messages" id="chatMessages"><div class="message agent">Hello! I'm the Reliability Twin AI Agent. I'm monitoring all systems. Ask me anything about the infrastructure health.</div></div><div class="chat-input"><input type="text" id="chatInput" placeholder="e.g., 'What's the status of the SQL database?'"><button id="chatSendBtn">Send</button></div></div></div><div class="ai-agent-column"><div class="ai-panel"><h3 class="section-header">Proactive Insights</h3><div class="insights-list"><div class="summary-item"><div class="summary-label">Highest Risk Component</div><div class="summary-value danger">SQL-DB-PROD-01</div></div><div class="summary-item"><div class="summary-label">Top Efficiency Opportunity</div><div class="summary-value positive">Scale down VM-cluster-dev</div></div></div></div><div class="ai-panel"><h3 class="section-header">Recommended Actions</h3><div class="actions-list"><div class="summary-item" style="display: flex; justify-content: space-between; align-items: center;"><p>Scale up AppSvc-Gateway to handle a predicted traffic spike.</p><div class="action-buttons" style="display: flex; gap: 0.5rem;"><button class="accept-btn">Accept</button><button class="dismiss-btn">Dismiss</button></div></div><div class="summary-item" style="display: flex; justify-content: space-between; align-items: center;"><p>Apply critical security patch to 12 virtual machines.</p><div class="action-buttons" style="display: flex; gap: 0.5rem;"><button class="accept-btn">Accept</button><button class="dismiss-btn">Dismiss</button></div></div></div></div></div></div>
+        </main>
+        <main id="alerts-center" class="dashboard-content page-content">
+            <h1 class="hero-title" style="color: var(--dark-blue);">Alerts Center</h1><p class="hero-subtitle" style="color: var(--gray-600); margin-bottom: 1.5rem;">Monitor, filter, and manage all system alerts from a centralized location.</p>
+            <div class="alerts-summary-grid"><div class="summary-card"><div class="summary-card-title">Total Alerts (24h)</div><div id="total-alerts-summary" class="summary-card-value">0</div></div><div class="summary-card"><div class="summary-card-title">Unresolved</div><div id="unresolved-alerts-summary" class="summary-card-value" style="color: var(--warning-yellow);">0</div></div><div class="summary-card"><div class="summary-card-title">High Priority</div><div id="high-priority-summary" class="summary-card-value" style="color: var(--danger-red);">0</div></div></div>
+            <div class="alerts-toolbar"><div class="search-bar"><input type="text" id="alertSearchInput" placeholder="Search by service or description..."></div><select id="severityFilter"><option value="all">All Severities</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select><select id="statusFilter"><option value="all">All Statuses</option><option value="new">New</option><option value="acknowledged">Acknowledged</option><option value="resolved">Resolved</option></select></div>
+            <div class="table-container card"><table class="styled-table"><thead><tr><th>Severity</th><th>Status</th><th>Service</th><th>Description</th><th>Timestamp</th><th>Actions</th></tr></thead><tbody id="alertsTableBody"></tbody></table></div>
+        </main>
+        <main id="simulations" class="dashboard-content page-content">
+            <h1 class="hero-title" style="color: var(--dark-blue);">Chaos & Performance Simulations</h1><p class="hero-subtitle" style="color: var(--gray-600); margin-bottom: 1.5rem;">Test infrastructure resilience by simulating failure events in a safe environment.</p>
+            <div class="simulation-grid"><div class="simulation-controls card"><h3 class="section-header">Simulation Setup</h3><div class="form-field"><label for="simulationType">Simulation Type</label><select id="simulationType"><option value="failure">Failure Injection</option></select></div><div class="form-field"><label for="targetService">Target Service</label><select id="targetService"></select></div><button id="runSimulationBtn" class="action-button" style="margin-top: 1rem;">Run Simulation</button><button id="resetSimulationBtn" class="action-button secondary" style="margin-top: 0.5rem;" disabled>Reset</button><div class="sim-results-log" id="simulationLog" style="margin-top: 1rem;"><p>Ready to start simulation...</p></div></div><div class="simulation-visualization" id="simulationViz"></div></div>
+        </main>
+        <main id="recommendations" class="dashboard-content page-content">
+            <h1 class="hero-title" style="color: var(--dark-blue);">AI-Powered Recommendations</h1><p class="hero-subtitle" style="color: var(--gray-600); margin-bottom: 1.5rem;">Proactive insights to optimize cost, enhance performance, and strengthen security.</p>
+            <div class="alerts-summary-grid"><div class="summary-card"><div class="summary-card-title">Active Recommendations</div><div id="rec-active-summary" class="summary-card-value">0</div></div><div class="summary-card"><div class="summary-card-title">Potential Monthly Savings</div><div id="rec-savings-summary" class="summary-card-value" style="color: var(--success-green);">$0</div></div><div class="summary-card"><div class="summary-card-title">High Priority</div><div id="rec-high-priority-summary" class="summary-card-value" style="color: var(--danger-red);">0</div></div></div>
+            <div class="alerts-toolbar"><select id="recCategoryFilter"><option value="all">All Categories</option><option value="cost">Cost</option><option value="performance">Performance</option><option value="security">Security</option></select><select id="recStatusFilter"><option value="new">New</option><option value="all">All Statuses</option><option value="applied">Applied</option><option value="dismissed">Dismissed</option></select></div>
+            <div id="recommendationsGrid" class="recommendations-grid"></div>
+        </main>
+        <main id="cloud-migration" class="dashboard-content page-content">
+            <h1 class="hero-title" style="color: var(--dark-blue);">Azure to Apache CloudStack Migration</h1>
+            <p class="hero-subtitle" style="color: var(--gray-600); margin-bottom: 1.5rem;">Utilize this tool to analyze your Azure environment and simulate a migration to the open-source Apache CloudStack platform to forecast significant cost savings.</p>
+            <div class="migration-wizard">
+                <div id="migration-step-1" class="wizard-step active"><div class="wizard-step-header"><div class="wizard-step-number">1</div><h2 class="wizard-step-title">Discovery & Analysis</h2></div><div class="wizard-step-content"><p style="margin-bottom: 1rem;">Begin by scanning your connected Azure subscriptions to discover resources eligible for migration.</p><button id="scanAzureBtn" class="action-button">Scan Azure Resources</button><div id="scanResults" style="display: none; margin-top: 1.5rem;"><h3 class="section-header">Discovered Resources</h3><div class="table-container card"><table class="styled-table" id="resourcesTable"><thead><tr><th>Resource Name</th><th>Type</th><th>Location</th><th>Size/SKU</th><th>Est. Monthly Cost</th><th>Compatibility</th></tr></thead><tbody></tbody></table></div><div id="analysisSection" style="margin-top: 1rem; text-align: right;"><button id="analyzeCostBtn" class="action-button secondary">Analyze Compatibility & Cost</button></div><div id="analysisResult" class="summary-card" style="display:none; margin-top:1rem; text-align:center;"><div class="summary-card-title">Analysis Complete</div><div class="summary-card-value" style="color: var(--success-green);">Potential Savings: ~$3,200/mo</div><p>Proceed to generate the migration plan.</p></div></div></div></div>
+                <div id="migration-step-2" class="wizard-step"><div class="wizard-step-header"><div class="wizard-step-number">2</div><h2 class="wizard-step-title">Migration Plan</h2></div><div class="wizard-step-content"><p style="margin-bottom: 1rem;">The AI has generated a recommended migration plan. Review and validate before execution.</p><div class="table-container card"><table class="styled-table" id="migrationPlanTable"><thead><tr><th>Azure Resource</th><th>CloudStack Equivalent</th><th>Migration Strategy</th></tr></thead><tbody></tbody></table></div><div style="margin-top: 1rem; text-align: right;"><button id="validatePlanBtn" class="action-button">Validate Plan & Proceed</button></div></div></div>
+                <div id="migration-step-3" class="wizard-step"><div class="wizard-step-header"><div class="wizard-step-number">3</div><h2 class="wizard-step-title">Execute & Monitor</h2></div><div class="wizard-step-content"><p style="margin-bottom: 1rem;">Start the automated migration process. This is a simulation and will not affect live resources.</p><button id="startMigrationBtn" class="action-button">Start Simulated Migration</button><div id="migrationProgress" style="display: none; margin-top: 1.5rem;"><h3 class="section-header">Overall Progress</h3><div class="progress-bar-container"><div id="overallProgressBar" class="progress-bar"></div></div><div class="table-container card" style="margin-top: 1rem;"><table class="styled-table" id="migrationStatusTable"><thead><tr><th>Resource</th><th>Status</th></tr></thead><tbody></tbody></table></div></div></div></div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Page/View Switching Logic ---
+            const navItems = document.querySelectorAll('.nav-item');
+            const pageContents = document.querySelectorAll('.page-content');
+            navItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const targetId = item.getAttribute('data-target');
+                    if (!targetId) return;
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    item.classList.add('active');
+                    pageContents.forEach(content => content.classList.toggle('active', content.id === targetId));
+                });
+            });
+
+             // --- Chart Generation ---
+            const chartArea = document.getElementById('chartArea');
+            if (chartArea) {
+                chartArea.innerHTML = '';
+                for (let i = 0; i < 24; i++) {
+                    const bar = document.createElement('div');
+                    bar.classList.add('chart-bar');
+                    bar.style.height = `${Math.random() * (98 - 70) + 70}%`;
+                    chartArea.appendChild(bar);
+                }
+            }
+
+            // --- AI Agent Chat Logic ---
+            const chatMessages = document.getElementById('chatMessages');
+            const chatInput = document.getElementById('chatInput');
+            const chatSendBtn = document.getElementById('chatSendBtn');
+            if (chatSendBtn) {
+                const agentResponses = {"status": "All systems are currently reporting 100% uptime. However, I'm tracking a performance degradation warning on AppSvc-Gateway.", "sql": "SQL-DB-PROD-01 is under high load and is at critical risk of failure within 12 hours. I recommend allocating more resources or investigating the running queries.", "risk": "The highest risk component is SQL-DB-PROD-01 due to sustained high CPU. I've also flagged 12 VMs that are missing a critical security patch.", "default": "I can help with system status, risk analysis, and performance metrics. Please ask me about a specific service like 'SQL status' or 'high risk components'."};
+                const addMessage = (text, sender) => {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.classList.add('message', sender);
+                    messageDiv.textContent = text;
+                    chatMessages.appendChild(messageDiv);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                };
+                const handleChatSubmit = () => {
+                    const userInput = chatInput.value.trim();
+                    if (userInput) {
+                        addMessage(userInput, 'user');
+                        chatInput.value = '';
+                        setTimeout(() => {
+                            let response = agentResponses.default;
+                            if (userInput.toLowerCase().includes('status')) response = agentResponses.status;
+                            else if (userInput.toLowerCase().includes('sql')) response = agentResponses.sql;
+                            else if (userInput.toLowerCase().includes('risk')) response = agentResponses.risk;
+                            addMessage(response, 'agent');
+                        }, 1000 + Math.random() * 500);
+                    }
+                };
+                chatSendBtn.addEventListener('click', handleChatSubmit);
+                chatInput.addEventListener('keypress', (e) => e.key === 'Enter' && handleChatSubmit());
+            }
+            
+            // --- Recommended Actions Logic ---
+            const actionsList = document.querySelector('.actions-list');
+            if(actionsList) {
+                actionsList.addEventListener('click', (e) => {
+                    if(e.target.classList.contains('accept-btn') || e.target.classList.contains('dismiss-btn')) {
+                        const actionItem = e.target.closest('.summary-item');
+                        actionItem.style.transition = 'opacity 0.5s ease';
+                        actionItem.style.opacity = '0';
+                        setTimeout(() => actionItem.remove(), 500);
+                    }
+                });
+            }
+
+            // --- Alerts Center Logic ---
+            const alertsTableBody = document.getElementById('alertsTableBody');
+            if (alertsTableBody) {
+                let alertsData = [
+                    { id: 1, severity: 'high', status: 'new', service: 'SQL-DB-PROD-01', description: 'CPU utilization has exceeded 95% for 15 minutes.', timestamp: new Date(Date.now() - 5 * 60000) },
+                    { id: 2, severity: 'medium', status: 'new', service: 'AppSvc-Gateway', description: 'Response latency is above 2000ms.', timestamp: new Date(Date.now() - 25 * 60000) },
+                    { id: 3, severity: 'low', status: 'acknowledged', service: 'Storage-Prod', description: 'Storage account capacity is at 85%.', timestamp: new Date(Date.now() - 65 * 60000) },
+                    { id: 4, severity: 'medium', status: 'new', service: 'AKS-Cluster-Prod', description: 'Node is unresponsive and needs reboot.', timestamp: new Date(Date.now() - 120 * 60000) },
+                    { id: 5, severity: 'high', status: 'resolved', service: 'VM-Auth-Service', description: 'Critical security vulnerability CVE-2024-12345 detected.', timestamp: new Date(Date.now() - 240 * 60000) },
+                    { id: 6, severity: 'low', status: 'resolved', service: 'CosmosDB-WestUS', description: 'Request units are nearing provisioned limit.', timestamp: new Date(Date.now() - 500 * 60000) }
+                ];
+
+                const severityColors = { high: 'var(--danger-red)', medium: 'var(--warning-yellow)', low: 'var(--success-green)' };
+                const searchInput = document.getElementById('alertSearchInput');
+                const severityFilter = document.getElementById('severityFilter');
+                const statusFilter = document.getElementById('statusFilter');
+                const timeSince = (date) => { const seconds = Math.floor((new Date() - date) / 1000); let interval = seconds / 31536000; if (interval > 1) return Math.floor(interval) + " years ago"; interval = seconds / 2592000; if (interval > 1) return Math.floor(interval) + " months ago"; interval = seconds / 86400; if (interval > 1) return Math.floor(interval) + " days ago"; interval = seconds / 3600; if (interval > 1) return Math.floor(interval) + " hours ago"; interval = seconds / 60; if (interval > 1) return Math.floor(interval) + " minutes ago"; return Math.floor(seconds) + " seconds ago"; };
+                const renderAlerts = () => {
+                    const filters = { search: searchInput.value.toLowerCase(), severity: severityFilter.value, status: statusFilter.value };
+                    const filteredAlerts = alertsData.filter(a => (a.service.toLowerCase().includes(filters.search) || a.description.toLowerCase().includes(filters.search)) && (filters.severity === 'all' || a.severity === filters.severity) && (filters.status === 'all' || a.status === filters.status));
+                    alertsTableBody.innerHTML = filteredAlerts.map(alert => `<tr data-id="${alert.id}"><td><span class="severity-indicator" style="color: ${severityColors[alert.severity]}">${alert.severity}</span></td><td><span class="status-tag ${alert.status}">${alert.status}</span></td><td>${alert.service}</td><td style="white-space: normal;">${alert.description}</td><td>${timeSince(alert.timestamp)}</td><td class="table-actions">${alert.status === 'new' ? '<button class="acknowledge">Acknowledge</button>' : ''}${alert.status !== 'resolved' ? '<button class="resolve">Resolve</button>' : ''}</td></tr>`).join('');
+                    updateSummary();
+                };
+                const updateSummary = () => { document.getElementById('total-alerts-summary').textContent = alertsData.length; document.getElementById('unresolved-alerts-summary').textContent = alertsData.filter(a => a.status !== 'resolved').length; document.getElementById('high-priority-summary').textContent = alertsData.filter(a => a.severity === 'high' && a.status !== 'resolved').length; };
+                alertsTableBody.addEventListener('click', e => { const row = e.target.closest('tr'); if (!row) return; const alertId = parseInt(row.dataset.id), alert = alertsData.find(a => a.id === alertId); if (e.target.classList.contains('acknowledge')) { alert.status = 'acknowledged'; } else if (e.target.classList.contains('resolve')) { alert.status = 'resolved'; } renderAlerts(); });
+                searchInput.addEventListener('input', renderAlerts);
+                severityFilter.addEventListener('change', renderAlerts);
+                statusFilter.addEventListener('change', renderAlerts);
+                renderAlerts();
+            }
+
+            // --- Simulations Tool Logic ---
+            const simViz = document.getElementById('simulationViz');
+            if (simViz) {
+                const targetServiceSelect = document.getElementById('targetService');
+                const runBtn = document.getElementById('runSimulationBtn');
+                const resetBtn = document.getElementById('resetSimulationBtn');
+                const simLog = document.getElementById('simulationLog');
+
+                let services = [
+                    { id: 'AppSvc-Gateway', dependencies: ['SQL-DB-PROD-01', 'VM-Auth-Service'], status: 'healthy', pos: { x: '50%', y: '10%' } },
+                    { id: 'SQL-DB-PROD-01', dependencies: ['Storage-Prod'], status: 'healthy', pos: { x: '30%', y: '40%' } },
+                    { id: 'VM-Auth-Service', dependencies: [], status: 'healthy', pos: { x: '70%', y: '40%' } },
+                    { id: 'AKS-Cluster-Prod', dependencies: ['SQL-DB-PROD-01', 'Storage-Prod'], status: 'healthy', pos: { x: '50%', y: '70%' } },
+                    { id: 'Storage-Prod', dependencies: [], status: 'healthy', pos: { x: '30%', y: '90%' } }
+                ];
+
+                const initSim = () => {
+                    simViz.innerHTML = '';
+                    targetServiceSelect.innerHTML = '';
+                    services.forEach(s => {
+                        const node = document.createElement('div');
+                        node.className = `sim-node ${s.status}`;
+                        node.id = `node-${s.id}`;
+                        node.style.left = s.pos.x;
+                        node.style.top = s.pos.y;
+                        node.style.transform = 'translate(-50%, -50%)';
+                        node.textContent = s.id;
+                        simViz.appendChild(node);
+                        const option = document.createElement('option');
+                        option.value = s.id;
+                        option.textContent = s.id;
+                        targetServiceSelect.appendChild(option);
+                    });
+                };
+                const log = (message, type = 'info') => { simLog.innerHTML += `<p class="log-${type}">[${new Date().toLocaleTimeString()}] ${message}</p>`; simLog.scrollTop = simLog.scrollHeight; };
+                const resetSim = () => { services.forEach(s => s.status = 'healthy'); initSim(); log('Simulation environment has been reset.', 'success'); runBtn.disabled = false; resetBtn.disabled = true; };
+                const runFailureSim = (targetId) => {
+                    log(`Starting failure injection on ${targetId}...`, 'warn'); let queue = [targetId]; let processed = new Set();
+                    const processQueue = () => {
+                        if (queue.length === 0) { log('Cascading effects simulation complete.', 'success'); resetBtn.disabled = false; return; }
+                        const currentId = queue.shift(); processed.add(currentId);
+                        const service = services.find(s => s.id === currentId);
+                        service.status = service.id === targetId ? 'failed' : 'degraded';
+                        document.getElementById(`node-${service.id}`).className = `sim-node ${service.status}`;
+                        log(`${service.id} has become ${service.status}.`, service.status === 'failed' ? 'fail' : 'warn');
+                        services.forEach(s => { if (s.dependencies.includes(currentId) && !processed.has(s.id)) { queue.push(s.id); } });
+                        setTimeout(processQueue, 1500);
+                    };
+                    processQueue();
+                };
+                runBtn.addEventListener('click', () => { runBtn.disabled = true; simLog.innerHTML = ''; log('Initializing simulation...'); const target = targetServiceSelect.value; runFailureSim(target); });
+                resetBtn.addEventListener('click', resetSim);
+                initSim();
+            }
+
+            // --- Recommendations Tool Logic ---
+            const recommendationsGrid = document.getElementById('recommendationsGrid');
+            if (recommendationsGrid) {
+                let recommendationsData = [
+                    { id: 1, category: 'cost', priority: 'high', status: 'new', title: 'Right-size Underutilized VMs', description: 'Our analysis shows 5 VMs in the "Production" subscription are consistently operating at less than 15% CPU. Downsizing them from D4s_v3 to D2s_v3 could significantly reduce costs without impacting performance.', impact: { value: 450, unit: '$/mo savings' } },
+                    { id: 2, category: 'security', priority: 'high', status: 'new', title: 'Enable MFA for Admin Accounts', description: 'Multi-Factor Authentication is not enabled for 3 administrator accounts, posing a significant security risk. Enforce MFA to protect against unauthorized access.', impact: { value: 'Critical', unit: 'Risk Reduction' } },
+                    { id: 3, category: 'performance', priority: 'medium', status: 'new', title: 'Upgrade SQL-DB to a Higher Tier', description: 'The primary SQL database is experiencing high DTU saturation during peak hours, leading to query throttling. Upgrading from S2 to S3 tier will improve response times.', impact: { value: '+35%', unit: 'Performance' } },
+                    { id: 4, category: 'cost', priority: 'low', status: 'applied', title: 'Delete Unassociated Public IPs', description: 'Found 12 public IP addresses that are no longer associated with any running service. Deleting them will remove unnecessary costs.', impact: { value: 85, unit: '$/mo savings' } },
+                    { id: 5, category: 'security', priority: 'medium', status: 'dismissed', title: 'Restrict Network Access to Storage', description: 'The "Storage-Prod" account allows public access. Restrict access to specific virtual networks to enhance data security.', impact: { value: 'High', unit: 'Risk Reduction' } }
+                ];
+
+                const categoryFilter = document.getElementById('recCategoryFilter');
+                const statusFilter = document.getElementById('recStatusFilter');
+                const renderRecommendations = () => {
+                    const filters = { category: categoryFilter.value, status: statusFilter.value };
+                    const filteredData = recommendationsData.filter(rec => (filters.category === 'all' || rec.category === filters.category) && (filters.status === 'all' || rec.status === filters.status));
+                    recommendationsGrid.innerHTML = filteredData.map(rec => `<div class="recommendation-card" data-id="${rec.id}"><div class="rec-header"><span class="rec-category ${rec.category}">${rec.category}</span><span class="severity-badge ${rec.priority}">${rec.priority}</span></div><div class="rec-content"><h3 class="rec-title">${rec.title}</h3><p class="rec-description">${rec.description}</p><div class="rec-impact"><span class="rec-impact-label">Potential Impact:</span><span class="rec-impact-value" style="color:${rec.category === 'cost' ? 'var(--success-green)' : 'var(--dark-blue)'}">${rec.impact.value} ${rec.impact.unit}</span></div></div><div class="rec-footer"><span class="rec-status-tag ${rec.status}">Status: ${rec.status}</span><div class="action-buttons">${rec.status === 'new' ? '<button class="accept-btn">Apply</button><button class="dismiss-btn">Dismiss</button>' : ''}</div></div></div>`).join('');
+                    updateRecSummary();
+                };
+                const updateRecSummary = () => {
+                    const activeRecs = recommendationsData.filter(r => r.status === 'new');
+                    document.getElementById('rec-active-summary').textContent = activeRecs.length;
+                    document.getElementById('rec-high-priority-summary').textContent = activeRecs.filter(r => r.priority === 'high').length;
+                    const totalSavings = recommendationsData.filter(r => r.category === 'cost' && r.status !== 'dismissed').reduce((sum, r) => sum + r.impact.value, 0);
+                    document.getElementById('rec-savings-summary').textContent = `$${totalSavings}`;
+                };
+                recommendationsGrid.addEventListener('click', e => {
+                    if (e.target.tagName !== 'BUTTON') return;
+                    const card = e.target.closest('.recommendation-card');
+                    const recId = parseInt(card.dataset.id);
+                    const rec = recommendationsData.find(r => r.id === recId);
+                    if (e.target.classList.contains('accept-btn')) { rec.status = 'applied'; } else if (e.target.classList.contains('dismiss-btn')) { rec.status = 'dismissed'; }
+                    renderRecommendations();
+                });
+                categoryFilter.addEventListener('change', renderRecommendations);
+                statusFilter.addEventListener('change', renderRecommendations);
+                renderRecommendations();
+            }
+
+            // --- Cloud Migration Tool Logic ---
+            const migrationWizard = document.querySelector('.migration-wizard');
+            if (migrationWizard) {
+                const scanBtn = document.getElementById('scanAzureBtn');
+                const scanResults = document.getElementById('scanResults');
+                const resourcesTableBody = document.querySelector('#resourcesTable tbody');
+                
+                const analyzeCostBtn = document.getElementById('analyzeCostBtn');
+                const analysisResult = document.getElementById('analysisResult');
+
+                const validatePlanBtn = document.getElementById('validatePlanBtn');
+                const migrationPlanTableBody = document.querySelector('#migrationPlanTable tbody');
+                
+                const startMigrationBtn = document.getElementById('startMigrationBtn');
+                const migrationProgress = document.getElementById('migrationProgress');
+                const overallProgressBar = document.getElementById('overallProgressBar');
+                const migrationStatusTableBody = document.querySelector('#migrationStatusTable tbody');
+
+                const dummyResources = [
+                    { name: 'VM-PROD-WEB-01', type: 'Virtual Machine', loc: 'East US', sku: 'Standard_D4s_v3', cost: 800 },
+                    { name: 'SQL-DB-PROD-01', type: 'SQL Database', loc: 'East US', sku: 'S3', cost: 1200 },
+                    { name: 'storage-prod-logs', type: 'Storage Account', loc: 'East US', sku: 'Standard_LRS', cost: 250 },
+                    { name: 'VM-DEV-TEST-01', type: 'Virtual Machine', loc: 'West US', sku: 'Standard_B2s', cost: 150 },
+                ];
+
+                const setActiveStep = (stepNumber) => {
+                    document.querySelectorAll('.wizard-step').forEach(step => step.classList.remove('active'));
+                    document.getElementById(`migration-step-${stepNumber}`).classList.add('active');
+                };
+
+                scanBtn.addEventListener('click', () => {
+                    scanBtn.textContent = 'Scanning...';
+                    scanBtn.disabled = true;
+                    resourcesTableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Scanning Azure subscriptions...</td></tr>`;
+                    scanResults.style.display = 'block';
+
+                    setTimeout(() => {
+                        resourcesTableBody.innerHTML = dummyResources.map(r => 
+                            `<tr><td>${r.name}</td><td>${r.type}</td><td>${r.loc}</td><td>${r.sku}</td><td>$${r.cost}/mo</td><td id="comp-${r.name}">Pending...</td></tr>`
+                        ).join('');
+                        scanBtn.textContent = 'Scan Complete';
+                    }, 2000);
+                });
+
+                analyzeCostBtn.addEventListener('click', () => {
+                    analyzeCostBtn.textContent = 'Analyzing...';
+                    analyzeCostBtn.disabled = true;
+                    
+                    setTimeout(() => {
+                        document.getElementById('comp-VM-PROD-WEB-01').innerHTML = `<span class="status-tag compatible">Compatible</span>`;
+                        document.getElementById('comp-SQL-DB-PROD-01').innerHTML = `<span class="status-tag incompatible">Incompatible</span>`;
+                        document.getElementById('comp-storage-prod-logs').innerHTML = `<span class="status-tag compatible">Compatible</span>`;
+                        document.getElementById('comp-VM-DEV-TEST-01').innerHTML = `<span class="status-tag compatible">Compatible</span>`;
+                        
+                        analysisResult.style.display = 'block';
+                        analyzeCostBtn.textContent = 'Analysis Complete';
+                        
+                        setTimeout(() => setActiveStep(2), 1000);
+
+                        migrationPlanTableBody.innerHTML = `
+                            <tr><td>VM-PROD-WEB-01</td><td>Large Instance (4vCPU, 16GB RAM)</td><td>Lift & Shift (V2V)</td></tr>
+                            <tr><td>SQL-DB-PROD-01</td><td>Self-Hosted PostgreSQL on VM</td><td>Re-platform</td></tr>
+                            <tr><td>storage-prod-logs</td><td>NFS Share</td><td>Data Transfer</td></tr>
+                            <tr><td>VM-DEV-TEST-01</td><td>Small Instance (2vCPU, 4GB RAM)</td><td>Lift & Shift (V2V)</td></tr>
+                        `;
+                    }, 2500);
+                });
+
+                validatePlanBtn.addEventListener('click', () => {
+                    validatePlanBtn.textContent = 'Validated';
+                    validatePlanBtn.disabled = true;
+                    setActiveStep(3);
+                });
+
+                startMigrationBtn.addEventListener('click', () => {
+                    startMigrationBtn.disabled = true;
+                    migrationProgress.style.display = 'block';
+                    const compatibleResources = dummyResources.filter(r => r.name !== 'SQL-DB-PROD-01');
+                    migrationStatusTableBody.innerHTML = compatibleResources.map(r => `<tr id="status-row-${r.name}"><td>${r.name}</td><td><span class="status-tag pending">Pending</span></td></tr>`).join('');
+                    
+                    let completed = 0;
+                    const total = compatibleResources.length;
+
+                    compatibleResources.forEach((resource, index) => {
+                        setTimeout(() => {
+                            const row = document.getElementById(`status-row-${resource.name}`);
+                            row.cells[1].innerHTML = `<span class="status-tag in-progress">In Progress...</span>`;
+
+                            setTimeout(() => {
+                                const success = Math.random() > 0.1; // 90% success rate
+                                row.cells[1].innerHTML = `<span class="status-tag ${success ? 'completed' : 'failed'}">${success ? 'Completed' : 'Failed'}</span>`;
+                                completed++;
+                                overallProgressBar.style.width = `${(completed / total) * 100}%`;
+                                if (completed === total) {
+                                    startMigrationBtn.textContent = "Simulation Finished";
+                                }
+                            }, 3000 + (Math.random() * 2000));
+                        }, index * 4000);
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html>
+
