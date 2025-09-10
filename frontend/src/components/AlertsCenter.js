@@ -49,6 +49,15 @@ const AlertsCenter = () => {
         setFilters(prev => ({ ...prev, [name]: value }));
     };
 
+    const handleAlertAction = (id, action) => {
+        setAlerts(prevAlerts => prevAlerts.map(alert => {
+            if (alert.id === id) {
+                return { ...alert, status: action };
+            }
+            return alert;
+        }));
+    };
+
     const totalAlerts = alerts.length;
     const unresolvedAlerts = alerts.filter(a => a.status !== 'resolved').length;
     const highPriorityAlerts = alerts.filter(a => a.severity === 'high' && a.status !== 'resolved').length;
@@ -109,8 +118,8 @@ const AlertsCenter = () => {
                                 <td style={{ whiteSpace: 'normal' }}>{alert.description}</td>
                                 <td>{timeSince(alert.timestamp)}</td>
                                 <td className="table-actions">
-                                    {alert.status === 'new' && <button className="acknowledge">Acknowledge</button>}
-                                    {alert.status !== 'resolved' && <button className="resolve">Resolve</button>}
+                                    {alert.status === 'new' && <button className="acknowledge" onClick={() => handleAlertAction(alert.id, 'acknowledged')}>Acknowledge</button>}
+                                    {alert.status !== 'resolved' && <button className="resolve" onClick={() => handleAlertAction(alert.id, 'resolved')}>Resolve</button>}
                                 </td>
                             </tr>
                         ))}
