@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/app/backend/app.py", line 1, in <module>
+    from flask import Flask, jsonify
+  File "/home/jules/.pyenv/versions/3.12.11/lib/python3.12/site-packages/flask/__init__.py", line 5, in <module>
+    from .app import Flask as Flask
+  File "/home/jules/.pyenv/versions/3.12.11/lib/python3.12/site-packages/flask/app.py", line 30, in <module>
+    from werkzeug.urls import url_quote
+ImportError: cannot import name 'url_quote' from 'werkzeug.urls' (/home/jules/.pyenv/versions/3.12.11/lib/python3.12/site-packages/werkzeug/urls.py). Did you mean: 'unquote'?
